@@ -3,7 +3,7 @@
 <head> 
 	<meta charset="UTF-8" />
     <title>HekseHopp</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
+    <meta name="viewport" content="user-scalable=no">
     
 	<script type="text/javascript" src="js/phaser.min.js"></script>
     <style>
@@ -77,7 +77,11 @@
 <script type="text/javascript" src="js/App42-all-3.1.min.js"></script>
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
 <script type="text/javascript">
-var game = new Phaser.Game(900, 400, Phaser.AUTO, 'game_window');
+const Presets = {
+  'width': window.innerWidth < 480 ? 480 : 900,
+  'height': window.innerHeight-32 < 320 ? 320 :400
+}
+var game = new Phaser.Game(Presets.width, Presets.height, Phaser.AUTO, 'game_window');
 
 var mainState = {
  preload: function() {
