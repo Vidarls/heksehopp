@@ -2,18 +2,66 @@
 <html lang="en"> 
 <head> 
 	<meta charset="UTF-8" />
-	<title>Phaser - Making your first game, part 1</title>
+	<title>HekseHopp</title>
 	<script type="text/javascript" src="js/phaser.min.js"></script>
-    <style type="text/css">
-        body {
-            margin: 0;
+    <style>
+        body, html {
+          height: 100%;
+          margin: 0;
+          font: 400 15px/1.8 "Lato", sans-serif;
+          color: #777;
         }
-    </style>
-</head>
-<body>
-<script src="js/phaser-input.js"></script>
-<script type="text/javascript">
+        
+        .bgimg-1, .bgimg-2, .bgimg-3 {
+          position: relative;
+          background-position: center;
+          background-repeat: no-repeat;
+          background-size: cover;
+        
+        }
+        .bgimg-1 {
+          background-image: url("images/background.jpg");
+          height: 100%;
+        }
+        
+        .game {
+          position: absolute;
+          left: 20%;
+          top: 20%;
+          width: 100%;
+          text-align: center;
+          color: #000;
+        }
+        
+        .game div.border {
+          background-color: #FFF;
+          color: #fff;
+          padding: 18px;
+        }
+        
+        h3 {
+          letter-spacing: 5px;
+          text-transform: uppercase;
+          font: 20px "Lato", sans-serif;
+          color: #111;
+        }
+        </style>
+        </head>
+        <body>
+            
+            <div class="bgimg-1">
+              <div class="caption">
+                <div class="game" id="game_window"></div><br>
+              </div>
+            </div>
+            
+            <p style="padding:5px 15px">Developed by Vetserve Team.</p>
+            
 
+<script src="js/phaser-input.js"></script>
+<script type="text/javascript" src="js/App42-all-3.1.min.js"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+<script type="text/javascript">
 var game = new Phaser.Game(900, 400, Phaser.AUTO, 'game_window');
 
 var mainState = {
@@ -26,6 +74,7 @@ var mainState = {
     game.load.spritesheet('bat', 'assets/bat.png', 80,28,6);
     game.load.spritesheet('groot', 'assets/groot.png', 130,150,6);
     game.load.audio('back', ['assets/background.mp3']);
+    game.load.audio('collide', ['assets/Bats.mp3']);
 },
 
  create:function() {
@@ -85,9 +134,9 @@ var mainState = {
     this.score = 0;
     this.labelScore = game.add.text(20, 20, "0", 
     { font: "30px Arial", fill: "#ffffff" });   
-    this.UserName = game.add.text(20, 20, "0", 
+    this.UserName = game.add.text(20, 40, "0", 
     { font: "30px Arial", fill: "#ffffff" });
-    //this.UserName.text = gameStartState.input; 
+    this.UserName.text = gameStartState.input.value; 
 
     //tombstone
     var rnd = game.rnd.integerInRange(3, 8);
@@ -96,12 +145,12 @@ var mainState = {
 
     //bat
     var rnd_bat = game.rnd.integerInRange(3, 8);
-    var time_rnd_bat = game.rnd.integerInRange(4, 6) * 120;
+    var time_rnd_bat = game.rnd.integerInRange(4, 6) * 140;
     this.timer = game.time.events.loop(time_rnd_bat * rnd_bat, this.addBats, this); 
     
     //pumpkins
     var rnd_pump = game.rnd.integerInRange(3, 8);
-    var time_rnd_pump = game.rnd.integerInRange(4, 6) * 130;
+    var time_rnd_pump = game.rnd.integerInRange(4, 6) * 160;
     this.timer = game.time.events.loop(time_rnd_pump * rnd_pump, this.addPumpkins, this);    
     
     //groots
@@ -255,12 +304,14 @@ addPumpkins: function(){
 
 addScore: function(){
     this.pumpkins.children[0].destroy(); 
-    this.score += 1;
+    this.score += 10;
     this.labelScore.text = this.score; 
 
 },
 
  restartGame : function(){
+    music = game.add.audio('collide');
+    music.play();
     game.state.start('over');
 }
 };
@@ -270,12 +321,15 @@ var gameoverState = {
     preload: function(){
         game.load.image('background', 'assets/end.jpg');
         game.load.image('restart', 'assets/restart.png');
+        game.load.image('leader', 'assets/leaderboard.png');
     },
 
     create: function () {
+        registerScore(gameStartState.input.value, mainState.score);
         this.background = game.add.tileSprite(0,-10, game.world.width, game.world.height, 'background');
         this.score = game.add.text(game.world.centerX + 90, 200, '', {font: '20px Arial', fill: '#FFF'});
-        this.restartButton = game.add.button(340, 250, 'restart', this.restartGame, this, 0, 0, 0);
+        this.restartButton = game.add.button(120, 250, 'restart', this.restartGame, this, 0, 0, 0);
+        this.restartButton = game.add.button(410, 250, 'leader', this.leaderboard, this, 0, 0, 0);
         this.score.text = mainState.score;
         this.score.visible = true; 
     },
@@ -284,10 +338,13 @@ var gameoverState = {
 
         },
 
-    restartGame: function(){
-        game.state.start('main'); 
+    restartGame: function(){  
+        game.state.start('start'); 
+    },
+
+    leaderboard: function(){
+        game.state.start('leaderboard'); 
     }
-    
     
 };
 
@@ -296,13 +353,14 @@ var gameStartState = {
     preload: function(){
         game.load.image('background', 'assets/start.jpg');
         game.load.image('start', 'assets/start.png');
+        game.load.image('leader', 'assets/leaderboard.png');
         game.plugins.add(PhaserInput.Plugin);
     },
 
     create: function () {
-        
         this.background = game.add.tileSprite(0,-10, game.world.width, game.world.height, 'background');
-        this.restartButton = game.add.button(350, 250, 'start', this.restartGame, this, 0, 0, 0);
+        this.restartButton = game.add.button(180, 250, 'start', this.restartGame, this, 0, 0, 0);
+        this.restartButton = game.add.button(390, 250, 'leader', this.leaderboard, this, 0, 0, 0);
         this.input = game.add.inputField(480, 190, {
                 font: '24px Arial',
                 fill: '#212121',
@@ -321,12 +379,96 @@ var gameStartState = {
 
     restartGame: function(){
         game.state.start('main'); 
+    },
+
+    leaderboard: function(){
+        game.state.start('leaderboard'); 
     }
     
     
 };
 
 
+var scoreState = {
+
+            loadLeaderBoard:function (theOtherThis) {
+                App42.initialize("388b0287a7b23d5eba3e1fa83c37d0db5e7a2356b006872a3b7ff44e044a7ead","d16ab9cea9c4e11a460f90f974f4061b0174ced4015f46e7d8662c4ac7f251e1");
+                var scoreBoardService = new App42ScoreBoard();
+                scoreBoardService.getTopNRankers("HekseHopp", 7,{    
+                    success: function(object)   
+                    {    
+                    var scorelist = "";
+                        var game = JSON.parse(object);    
+                        result = game.app42.response.games.game;  
+                        var scoreList = result.scores.score;  
+                    
+                        for (i = 0; i < scoreList.length; i++) { 
+                            scorelist += scoreList[i].userName + ": " + scoreList[i].value  + '\n';
+                        }
+                        theOtherThis.score.text = scorelist;
+                        theOtherThis.score.visible = true;
+
+                     },    
+                    
+                    error: function(error) {    
+                    }    
+            }); 
+            },
+
+            preload: function () {
+                game.load.image('background', 'assets/leaderboard-page.png');
+                game.load.image('restart', 'assets/restart.png');
+
+
+            },
+
+            create: function () {
+                this.background = game.add.tileSprite(0, -10, game.world.width, game.world.height, 'background');
+                this.score = game.add.text(game.world.centerX - 150, 85, '', { font: '20px Arial', fill: '#FFF' });
+                this.score.text = "Loading leaderboard...";
+                this.score.visible = true;
+                this.restartButton = game.add.button(game.world.centerX - 140, 300, 'restart', this.restartGame, this, 0, 0, 0);
+                this.loadLeaderBoard(this);
+            },
+
+            update: function () {
+
+                //stateText.text = " GAME OVER. \n Your score is " + mainState.score + "\n Click to restart" ;
+                //stateText.visible = true;
+
+
+                // game.input.onDown.addOnce(function () {
+                // game.state.start('main');});
+            },
+
+            restartGame: function () {
+                game.state.start('start');
+            }
+
+
+        };
+
+        var registerScore = function (userName, gameScore) {
+            App42.initialize("388b0287a7b23d5eba3e1fa83c37d0db5e7a2356b006872a3b7ff44e044a7ead","d16ab9cea9c4e11a460f90f974f4061b0174ced4015f46e7d8662c4ac7f251e1");
+            var scoreBoardService = new App42ScoreBoard();
+            var gameName = "HekseHopp";
+            if (gameScore > 0){
+            scoreBoardService.saveUserScore(gameName,userName,gameScore,{  
+                success: function(object) 
+                {  
+                    var leaderboardgame = JSON.parse(object);  
+                    result = leaderboardgame.app42.response.games.game;
+                    console.log("gameName is : " + result.name)
+                    var scoreList = result.scores.score;
+                    console.log("userName is : " + scoreList.userName)
+                    console.log("scoreId is : " + scoreList.scoreId)
+                    console.log("value is : " + scoreList.value)
+                },  
+                error: function(error) {  
+                }  
+            }); } }
+
+game.state.add('leaderboard', scoreState);
 game.state.add('main', mainState);  
 game.state.add('start', gameStartState);  
 game.state.add('over', gameoverState)
