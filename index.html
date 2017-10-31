@@ -33,6 +33,18 @@
           color: #000;
         }
         
+        @media screen and (max-width:768px) {
+        .game {
+            position: absolute;
+            left: 0%;
+            top: 0%;
+            width: 100%;
+            text-align: center;
+            color: #000;
+                
+            }
+        }
+        
         .game div.border {
           background-color: #FFF;
           color: #fff;
@@ -45,6 +57,7 @@
           font: 20px "Lato", sans-serif;
           color: #111;
         }
+
         </style>
         </head>
         <body>
@@ -79,6 +92,9 @@ var mainState = {
 
  create:function() {
     game.physics.startSystem(Phaser.Physics.ARCADE);
+
+    // game.load.onLoadStart.add(loadStart, this);
+    // game.load.onLoadComplete.add(loadComplete, this);
 
     //assets
     this.background = game.add.tileSprite(0,-10, game.world.width, game.world.height, 'background');
@@ -140,7 +156,7 @@ var mainState = {
 
     //tombstone
     var rnd = game.rnd.integerInRange(3, 8);
-    var time_rnd = game.rnd.integerInRange(4, 6) * 100;
+    var time_rnd = game.rnd.integerInRange(4, 6) * 300;
     this.timer = game.time.events.loop(time_rnd * rnd, this.addOneObstacles, this); 
 
     //bat
@@ -157,6 +173,19 @@ var mainState = {
     var rnd_groot = game.rnd.integerInRange(3, 8);
     var time_rnd_groot = game.rnd.integerInRange(4, 6) * 200;
     this.timer = game.time.events.loop(time_rnd_groot * rnd_groot, this.addGroots, this);     
+},
+
+
+loadStart : function() {
+
+	this.text.setText("Loading ...");
+
+},
+
+loadStart: function() {
+
+	this.text.visible = false;
+
 },
 
  keyDown : function() {
@@ -452,7 +481,7 @@ var scoreState = {
             App42.initialize("388b0287a7b23d5eba3e1fa83c37d0db5e7a2356b006872a3b7ff44e044a7ead","d16ab9cea9c4e11a460f90f974f4061b0174ced4015f46e7d8662c4ac7f251e1");
             var scoreBoardService = new App42ScoreBoard();
             var gameName = "HekseHopp";
-            if (gameScore > 0){
+            if (gameScore > 0 && gameName){
             scoreBoardService.saveUserScore(gameName,userName,gameScore,{  
                 success: function(object) 
                 {  
@@ -467,6 +496,9 @@ var scoreState = {
                 error: function(error) {  
                 }  
             }); } }
+
+
+
 
 game.state.add('leaderboard', scoreState);
 game.state.add('main', mainState);  
