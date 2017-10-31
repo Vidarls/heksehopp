@@ -78,8 +78,8 @@
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
 <script type="text/javascript">
 const Presets = {
-  'width': window.innerWidth < 480 ? 480 : 900,
-  'height': window.innerHeight-32 < 320 ? 320 :400
+  'width': window.innerWidth < 480 ? 480 : window.innerWidth,
+  'height': window.innerHeight-32 < 320 ? 320 :window.innerHeight
 }
 var game = new Phaser.Game(Presets.width, Presets.height, Phaser.AUTO, 'game_window');
 
