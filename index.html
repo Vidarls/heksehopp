@@ -387,7 +387,7 @@ var gameStartState = {
     },
 
     create: function () {
-        this.background = game.add.tileSprite(0,-10, game.world.width, game.world.height, 'background');
+        this.background = game.add.tileSprite(0,0, game.world.width, game.world.height, 'background');
         this.restartButton = game.add.button(180, 250, 'start', this.restartGame, this, 0, 0, 0);
         this.restartButton = game.add.button(390, 250, 'leader', this.leaderboard, this, 0, 0, 0);
         this.input = game.add.inputField(480, 190, {
